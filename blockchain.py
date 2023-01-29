@@ -3,6 +3,7 @@ import hashlib
 import datetime
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -151,3 +152,12 @@ def is_valid():
         return {'message': 'All good. The Blockchain is valid.'}
     else:
         return {'message': 'Houston, we have a problem. The Blockchain is not valid.'}
+
+
+@app.get("/")
+def index():
+    """
+    Returns the HTML template of the index page
+    :return:
+    """
+    return HTMLResponse(content=open('index.html').read())
