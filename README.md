@@ -1,4 +1,4 @@
-A very simple blockchain and its applications implementation in Python.
+A very simple implementation of blockchain and its applications in Python.
 
 - [Blockchain](#blockchain)
 - [Cryptocurrency](#cryptocurrency)
