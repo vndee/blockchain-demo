@@ -30,7 +30,7 @@ $ pip install fastapi uvicorn
 $ uvicorn blockchain:app
 ```
 Now, navigate to `http://localhost:8000/` to have a look at the demo page and `http://localhost:8000/docs` for the detail
-documentations for the API. The app behaviors should be like the following:
+documentations. The app behaviors should be like the following:
 ![Mine a block](assets/mine.png)<figcaption align="center">**Figure 1**: Mine a block</figcaption>
 
 ![Get the blockchain](assets/get-chain.png)<figcaption align="center">**Figure 2**: Get the blockchain</figcaption>
