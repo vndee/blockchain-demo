@@ -16,7 +16,7 @@ To use the base functionality of the blockchain, you can use the `Blockchain` cl
 - `check_valid_nonce`: Checks if the nonce satisfies the proof of work condition.
 - `check_valid_chain`: Determines if a given blockchain is valid.
 
-I also add a REST API to the blockchain. The API has the following endpoints:
+I also add a REST API server to serving these above functions. The API has the following endpoints:
 - `/mine-block`: Mines a new block.
 - `/get-chain`: Returns the full blockchain.
 - `/is-valid`: Checks if the blockchain is valid.
