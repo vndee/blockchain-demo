@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Tester</title>
+    <style>
+        /* Add styles for the navigation bar and buttons */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: lightgray;
+        }
+
+        .nav-bar button {
+            padding: 10px 20px;
+            background-color: lightblue;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-radius: 15px;
+            border: green 1px solid;
+            width: 100%;
+        }
+
+        th, td {
+            border: green 1px solid;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-bar">
+    <h1>Blockchain Tester</h1>
+    <div>
+        <button id="mine-block-btn">Mine Block</button>
+        <button id="get-chain-btn">Get Chain</button>
+        <button id="is-valid-btn">Check Valid Chain</button>
+    </div>
+</div>
+<div id="chain-display">
+    <h3 id="tb-title">This is the very simple blockchain implementation using Python.</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Index</th>
+            <th>Timestamp</th>
+            <th>Nonce</th>
+            <th>Data</th>
+            <th>Previous Hash</th>
+            <th>Hash</th>
+        </tr>
+        </thead>
+        <tbody id="chain-body">
+        <!-- Display the chain data here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Add event listeners for the buttons
+    document.getElementById("mine-block-btn").addEventListener("click", function () {
+        // Call the mine_block API
+        fetch("http://localhost:8000/mine_block")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                let tb_title = document.getElementById("tb-title");
+                tb_title.style.color = "green";
+                tb_title.innerHTML = data.message;
+
+                // Get the chain-body element
+                let chainBody = document.getElementById("chain-body");
+                // Clear the chain-body element
+                chainBody.innerHTML = "";
+                // Show the block data to the UI
+                let row = chainBody.insertRow(0);
+                row.innerHTML = `<td>${data.index}</td>
+                                 <td>${data.timestamp}</td>
+                                 <td>${data.nonce}</td>
+                                 <td>${data.data}</td>
+                                 <td>${data.previous_hash}</td>
+                                 <td>${data.hash}</td>`;
+            });
+    });
+    document.getElementById("get-chain-btn").addEventListener("click", function () {
+        // Call the get_chain API
+        fetch("http://localhost:8000/get_chain")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                let tb_title = document.getElementById("tb-title");
+                tb_title.innerHTML = "Blockchain Data (your own immutable ledger): " + data.length + " blocks";
+                tb_title.style.color = "green";
+                // Get the chain-body element
+                let chainBody = document.getElementById("chain-body");
+                // Clear the existing content in the chain-body
+                chainBody.innerHTML = "";
+                // Loop through the data and add a row for each block
+                data.chain.forEach(block => {
+                    let row = document.createElement("tr");
+                    row.innerHTML = `
+                          <td>${block.index}</td>
+                          <td>${block.timestamp}</td>
+                          <td>${block.nonce}</td>
+                          <td>${block.data}</td>
+                          <td>${block.previous_hash}</td>
+                          <td>${block.hash}</td>
+                        `;
+                    chainBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+    document.getElementById("is-valid-btn").addEventListener("click", function () {
+        // Call the is_valid API
+        fetch("http://localhost:8000/is_valid")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Show the result to the UI
+                let tb_title = document.getElementById("tb-title");
+                if (data.message == "All good. The Blockchain is valid.") {
+                    tb_title.style.color = "green";
+                } else {
+                    tb_title.style.color = "red";
+                }
+                tb_title.innerHTML = data.message;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+</script>
+
+</body>
+</html>

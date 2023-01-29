@@ -3,6 +3,7 @@ import hashlib
 import datetime
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class Blockchain(object):
@@ -24,10 +25,11 @@ class Blockchain(object):
             'index': len(self.chain) + 1,
             'timestamp': str(datetime.datetime.now()),
             'nonce': nonce,
-            'data': 'This is block',
+            'data': 'This is a block',
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
+        block['hash'] = self.hash(block)
         self.chain.append(block)
         return block
 
@@ -90,6 +92,14 @@ class Blockchain(object):
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 blockchain = Blockchain()
 
 
@@ -113,6 +123,7 @@ def mine_block():
         'nonce': block['nonce'],
         'data': block['data'],
         'previous_hash': block['previous_hash'],
+        'hash': block['hash'],
     }
     return response
 
