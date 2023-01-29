@@ -1,2 +1,1 @@
-# blockchain-demo
-Blockchain Demo Repository
+A very simple blockchain implementation in Python.
