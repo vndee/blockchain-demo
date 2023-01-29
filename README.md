@@ -31,15 +31,15 @@ $ uvicorn blockchain:app
 ```
 Now, navigate to `http://localhost:8000/` to have a look at the demo page and `http://localhost:8000/docs` for the detail
 documentations. The app behaviors should be like the following:
-<figcaption align="center">**Figure 1**: Mine a block</figcaption>
+<figcaption align="center">Figure 1: Mine a block</figcaption>
 
 ![Mine a block](assets/mine.png)
 
-<figcaption align="center">**Figure 2**: Get the blockchain</figcaption>
+<figcaption align="center">Figure 2: Get the blockchain</figcaption>
 
 ![Get the blockchain](assets/get-chain.png)
 
-<figcaption align="center">**Figure 3**: Check if the blockchain is valid</figcaption>
+<figcaption align="center">Figure 3: Check if the blockchain is valid</figcaption>
 
 ![Check if the blockchain is valid](assets/check-valid.png)
 
