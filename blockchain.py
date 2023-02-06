@@ -63,7 +63,7 @@ class Blockchain(object):
     @staticmethod
     def check_valid_nonce(last_nonce, nonce):
         """
-        Validates the Proof: Does hash(last_proof, proof) contain 4 leading zeroes?
+        Validates the Proof: Does hash(last_nonce, nonce) contain 4 leading zeroes?
         :param last_nonce: the last nonce
         :param nonce: the current nonce
         :return:
