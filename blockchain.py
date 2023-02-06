@@ -160,4 +160,4 @@ def index():
     Returns the HTML template of the index page
     :return:
     """
-    return HTMLResponse(content=open('index.html').read())
+    return HTMLResponse(content=open('templates/blockchain.html').read())
