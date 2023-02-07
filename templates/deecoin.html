@@ -1,63 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Blockchain Tester</title>
-    <style>
-        /* Add styles for the navigation bar and buttons */
-        .nav-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: lightgray;
-        }
+    <title>Cryptocurrency Tester</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This is the very simple cryptocurrency implementation using Python.">
+    <meta name="keywords" content="Blockchain, Cryptocurrency, Python, FastAPI">
+    <meta name="author" content="Duy V. Huynh">
 
-        .nav-bar button {
-            padding: 10px 20px;
-            background-color: lightblue;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        table {
-            border-collapse: collapse;
-            border-radius: 15px;
-            border: green 1px solid;
-            width: 100%;
-        }
-
-        th, td {
-            border: green 1px solid;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #ddd;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ host_url }}/static/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossOrigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
 </head>
+
 <body>
-<div class="nav-bar">
-    <h1>Blockchain Tester</h1>
-    <div>
-        <button id="mine-block-btn">Mine Block</button>
-        <button id="get-chain-btn">Get Chain</button>
-        <button id="is-valid-btn">Check Valid Chain</button>
+<nav class="nav-bar navbar">
+    <a class="navbar-brand" style="font-size: x-large" href="#">Cryptocurrency Tester</a>
+    <div class="form-inline">
+        <button id="add-transaction-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Add Transaction
+        </button>
+        <button id="mine-block-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Mine Block</button>
+        <button id="get-chain-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Get Chain</button>
+        <button id="is-valid-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Check Valid Chain</button>
+        <button id="replace-chain-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Replace Chain</button>
+        <button id="api-docs" class="btn btn-outline-success my-2 my-sm-0" type="button"><a
+                href="/docs" target="_blank">API Docs</a></button>
     </div>
-</div>
-<div id="chain-display">
-    <h3 id="tb-title">This is the very simple blockchain implementation using Python.</h3>
+</nav>
+
+<div id="chain-display" style="padding: 0 1%">
+    <h3 id="tb-title" class="text-center">This is the very simple cryptocurrency implementation using Python.</h3>
     <table>
         <thead>
         <tr>
-            <th>Index</th>
-            <th>Timestamp</th>
-            <th>Nonce</th>
-            <th>Transactions</th>
-            <th>Previous Hash</th>
-            <th>Hash</th>
+            <th class="mx-auto text-center">Index</th>
+            <th class="mx-auto text-center">Timestamp</th>
+            <th class="mx-auto text-center">Nonce</th>
+            <th class="mx-auto text-center">Transactions</th>
+            <th class="mx-auto text-center">Previous Hash</th>
+            <th class="mx-auto text-center">Hash</th>
         </tr>
         </thead>
         <tbody id="chain-body">
@@ -66,11 +53,140 @@
     </table>
 </div>
 
+<div class="container">
+    <div id="transaction-form" class="well well-success" style="display: none">
+        <h3 class="mx-auto text-center">Add a new transaction</h3>
+        <p id="transaction-subtitle" class="mx-auto text-center">Please fill in the form below to add a new transaction
+            to the blockchain</p>
+        <form class="form-horizontal transaction-form-width mx-auto">
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="sender_id">Sender:</label>
+                <div class="col-sm-10"><input class="form-control" id="sender_id" type="text" value="Duy V. Huynh">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="recipient_id">Recipient:</label>
+                <div class="col-sm-10"><input class="form-control" id="recipient_id" type="text"
+                                              value="Hoang N. Truong">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="amount_id">Amount:</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <span class="input-group-addon">#</span>
+                        <input class="form-control" id="amount_id" type="text" value="1">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2"><i class="icon-spinner icon-spin icon-large"></i></div>
+                <div class="col-sm-10">
+                    <button class="btn btn-primary ladda-button" id="submit-btn" data-style="expand-right"><span
+                            class="ladda-label">Submit</span></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- The full JSON content in a modal -->
+<div class="modal fade" id="transactionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h4 class="modal-title" id="exampleModalLabel">Transactions
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </h4>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay, understand!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="info-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h4 class="modal-title" id="info-modal-title">Modal title
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </h4>
+            </div>
+            <div class="modal-body" id="info-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay, understand!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Event listener for add-transaction-btn
+    document.getElementById("add-transaction-btn").addEventListener("click", function () {
+        // Hide the chain-display element
+        document.getElementById("chain-display").style.display = "none";
+        // Show the transaction form
+        document.getElementById("transaction-form").style.display = "block";
+
+        // Listen for the submit-btn click event and send the data to the API
+        document.getElementById("submit-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+            // Get the data from the form
+            let sender = document.getElementById("sender_id").value;
+            let recipient = document.getElementById("recipient_id").value;
+            let amount = document.getElementById("amount_id").value;
+            // Create a new transaction object
+            let transaction = {
+                "sender": sender,
+                "recipient": recipient,
+                "amount": amount
+            };
+            // Send the transaction data to the API
+            fetch("{{ host_url }}/add_transaction", {
+                method: "POST",
+                body: JSON.stringify(transaction),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    let tb_title = document.getElementById("transaction-subtitle");
+                    tb_title.style.color = "green";
+                    tb_title.innerHTML = data.message + "!<br>Please mine a new block to add the transaction to the " +
+                        "blockchain."
+
+                    // Set the background of transaction-form to green
+                    document.getElementById("transaction-form").style.backgroundColor = "rgb(223, 240, 216)";
+                })
+                .catch(error => {
+                    console.log(error);
+                    let tb_title = document.getElementById("transaction-subtitle");
+                    tb_title.style.color = "red";
+                    tb_title.innerHTML = "Something went wrong!";
+                });
+        });
+    });
+
     // Add event listeners for the buttons
     document.getElementById("mine-block-btn").addEventListener("click", function () {
+        // Hide the transaction form
+        document.getElementById("transaction-form").style.display = "none";
+        // Show the chain-display element
+        document.getElementById("chain-display").style.display = "block";
         // Call the mine_block API
-        fetch("http://localhost:8000/mine_block")
+        fetch("{{ host_url }}/mine_block")
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -87,20 +203,27 @@
                 row.innerHTML = `<td>${data.index}</td>
                                  <td>${data.timestamp}</td>
                                  <td>${data.nonce}</td>
-                                 <td>${data.transactions}</td>
+                                 <td><pre><code id="code" style="text-align: left">${JSON.stringify(data.transactions, null, 2)}</code></pre></td>
                                  <td>${data.previous_hash}</td>
                                  <td>${data.hash}</td>`;
+                hljs.highlightBlock(document.getElementById("code"), "json", true);
             });
     });
+
     document.getElementById("get-chain-btn").addEventListener("click", function () {
         // Call the get_chain API
-        fetch("http://localhost:8000/get_chain")
+        fetch("{{ host_url }}/get_chain")
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 let tb_title = document.getElementById("tb-title");
                 tb_title.innerHTML = "Blockchain Data (your own immutable ledger): " + data.length + " blocks";
                 tb_title.style.color = "green";
+                // Hide the transaction form
+                document.getElementById("transaction-form").style.display = "none";
+                // Show the chain-display element
+                document.getElementById("chain-display").style.display = "block";
+
                 // Get the chain-body element
                 let chainBody = document.getElementById("chain-body");
                 // Clear the existing content in the chain-body
@@ -112,29 +235,83 @@
                           <td>${block.index}</td>
                           <td>${block.timestamp}</td>
                           <td>${block.nonce}</td>
-                          <td>${block.data}</td>
+                          <td>${JSON.stringify(block.transactions, null, 2).substring(0, 50) + '...'}
+                            <button id="view-transaction-btn-${block.index}" class="btn btn-secondary btn-sm">View Full <i class="fa fa-arrow-right"></i></button></td>
                           <td>${block.previous_hash}</td>
                           <td>${block.hash}</td>
                         `;
                     chainBody.appendChild(row);
+
+                    document.getElementById(`view-transaction-btn-${block.index}`).addEventListener("click", function (e) {
+                        console.log("View transaction button clicked");
+
+                        let transactions = JSON.stringify(block.transactions, null, 2);
+                        $("#transactionsModal").modal("show");
+
+                        // Set the modal-body to the transactions
+                        hljs.initHighlightingOnLoad();
+                        let modalBody = document.getElementById("modal-body");
+                        modalBody.innerHTML = `<pre><code>${transactions}</code></pre>`;
+                        hljs.highlightBlock(modalBody, "json", true);
+                    });
                 });
             })
             .catch(error => {
                 console.error(error);
             });
     });
+
     document.getElementById("is-valid-btn").addEventListener("click", function () {
         // Call the is_valid API
-        fetch("http://localhost:8000/is_valid")
+        fetch("{{ host_url }}/is_valid")
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 // Show the result to the UI
+                $("#info-modal").modal("show");
+                let info_modal_title = document.getElementById("info-modal-title");
+                info_modal_title.innerHTML = `Check Result <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+
+                let info_modal = document.getElementById("info-modal-body");
+                info_modal.innerHTML = data.message;
+
                 let tb_title = document.getElementById("tb-title");
                 if (data.message == "All good. The Blockchain is valid.") {
                     tb_title.style.color = "green";
+                    info_modal.style.color = "green";
                 } else {
                     tb_title.style.color = "red";
+                    info_modal.style.color = "red";
+                }
+                tb_title.innerHTML = data.message;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+
+    // Listen to the replace-chain-btn and call the replace_chain API
+    document.getElementById("replace-chain-btn").addEventListener("click", function () {
+        // Call the replace_chain API
+        fetch("{{ host_url }}/replace_chain")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Show the result to the UI
+                $("#info-modal").modal("show");
+                let info_modal_title = document.getElementById("info-modal-title");
+                info_modal_title.innerHTML = `Replace Chain Result <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+
+                let info_modal = document.getElementById("info-modal-body");
+                info_modal.innerHTML = data.message;
+
+                let tb_title = document.getElementById("tb-title");
+                if (data.message == "The nodes had different chains so the chain was replaced by the longest one.") {
+                    tb_title.style.color = "green";
+                    info_modal.style.color = "green";
+                } else {
+                    tb_title.style.color = "blue";
+                    info_modal.style.color = "blue";
                 }
                 tb_title.innerHTML = data.message;
             })
@@ -143,6 +320,5 @@
             });
     });
 </script>
-
 </body>
 </html>

@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, status, Form, Request, Response, Body
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -93,7 +95,7 @@ class Blockchain(object):
                 continue
 
             # check if the links (hashes) of 2 consecutive blocks is valid
-            if block['previous_hash'] != hash(chain[index - 1]):
+            if block['previous_hash'] != self.hash(chain[index - 1]):
                 return False
 
             # check if the nonce is valid
@@ -152,7 +154,11 @@ class Blockchain(object):
 
         return False
 
+
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="templates/css"), name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -167,6 +173,12 @@ node_address = str(uuid4()).replace('-', '')
 
 class NodesAddress(BaseModel):
     address: List[str]
+
+
+class Transaction(BaseModel):
+    sender: str
+    recipient: str
+    amount: float
 
 
 @app.get("/mine_block", status_code=status.HTTP_200_OK)
@@ -221,15 +233,13 @@ def is_valid():
 
 
 @app.post("/add_transaction", status_code=status.HTTP_200_OK)
-def add_transaction(sender: str = Form(...), recipient: str = Form(...), amount: str = Form(...)):
+def add_transaction(transaction: Transaction):
     """
     Adds a new transaction to the list of transactions
-    :param sender: the sender of the transaction
-    :param recipient: the recipient of the transaction
-    :param amount: the amount of the transaction
+    :param transaction: the transaction to add
     :return:
     """
-    index = blockchain.add_transaction(sender, recipient, amount)
+    index = blockchain.add_transaction(transaction.sender, transaction.recipient, transaction.amount)
     response = {'message': f'This transaction will be added to Block {index}'}
     return response
 
@@ -241,7 +251,6 @@ def connect_node(node: NodesAddress):
     :param node:
     :return:
     """
-    print(node)
     if len(node.address) == 0:
         return Response(content=json.dumps({'message': 'No node'}), status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -269,10 +278,11 @@ def replace_chain():
     return response
 
 
-@app.get("/")
-def index():
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
     """
     Returns the HTML template of the index page
     :return:
     """
-    return HTMLResponse(content=open('templates/deecoin.html').read())
+    return templates.TemplateResponse("deecoin.html", {"host_url": "http://localhost:8000", "request": request})
+
