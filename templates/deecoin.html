@@ -29,6 +29,8 @@
         <button id="get-chain-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Get Chain</button>
         <button id="is-valid-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Check Valid Chain</button>
         <button id="replace-chain-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Replace Chain</button>
+        <button id="add-node-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">Add Node</button>
+        <button id="list-nodes-btn" class="btn btn-outline-success my-2 my-sm-0" type="button">List Nodes</button>
         <button id="api-docs" class="btn btn-outline-success my-2 my-sm-0" type="button"><a
                 href="/docs" target="_blank">API Docs</a></button>
     </div>
@@ -83,6 +85,33 @@
                 <div class="col-sm-2"><i class="icon-spinner icon-spin icon-large"></i></div>
                 <div class="col-sm-10">
                     <button class="btn btn-primary ladda-button" id="submit-btn" data-style="expand-right"><span
+                            class="ladda-label">Submit</span></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div id="add-node-form" class="well well-success" style="display: none">
+        <h3 class="mx-auto text-center">Add a node to the blockchain</h3>
+        <p id="add-node-subtitle" class="mx-auto text-center">Please fill in the form below to add a new node to the
+            blockchain</p>
+        <form class="form-horizontal transaction-form-width mx-auto">
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="node-address">Node Address:</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <span class="input-group-addon">#</span>
+                        <input class="form-control" id="node-address" type="text" value="127.0.0.1:5001">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2"><i class="icon-spinner icon-spin icon-large"></i></div>
+                <div class="col-sm-10">
+                    <button class="btn btn-primary ladda-button" id="add-node-submit-btn"
+                            data-style="expand-right"><span
                             class="ladda-label">Submit</span></button>
                 </div>
             </div>
@@ -314,6 +343,71 @@
                     info_modal.style.color = "blue";
                 }
                 tb_title.innerHTML = data.message;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+
+    // Event listener for the add-node-btn with node address that enter in the add-node-form
+    document.getElementById("add-node-btn").addEventListener("click", function () {
+        // Hide the chain-display element
+        document.getElementById("chain-display").style.display = "none";
+        // Show the add-node-form
+        document.getElementById("add-node-form").style.display = "block";
+
+        // Listen to add-node-form submit event
+        document.getElementById("add-node-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            // Get the node address from the add-node-form
+            let node_address = document.getElementById("node-address").value;
+            // Call the add_node API
+            fetch("{{ host_url }}/connect_node", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "address": [node_address]
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    // Show the result to the UI
+                    let tb_title = document.getElementById("add-node-subtitle");
+                    tb_title.innerHTML = data.message;
+                    if (data.message == "All good. The node has been successfully added.") {
+                        tb_title.style.color = "green";
+                    } else {
+                        tb_title.style.color = "red";
+                    }
+
+                    // Set the background of the add-node-form to the green
+                    document.getElementById("add-node-form").style.backgroundColor = "rgb(223, 240, 216)";
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+    });
+
+    // Event listener for list-nodes-btn
+    document.getElementById("list-nodes-btn").addEventListener("click", function () {
+        // Call the get_nodes API
+        fetch("{{ host_url }}/list_nodes")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Show the result to the info-modal UI
+                $("#info-modal").modal("show");
+                let info_modal_title = document.getElementById("info-modal-title");
+                info_modal_title.innerHTML = `List Nodes Result <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+                let info_modal = document.getElementById("info-modal-body");
+
+                hljs.initHighlightingOnLoad();
+                info_modal.innerHTML = JSON.stringify(data, null, 2);
+                hljs.highlightBlock(info_modal);
             })
             .catch(error => {
                 console.error(error);

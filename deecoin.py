@@ -244,7 +244,7 @@ def add_transaction(transaction: Transaction):
     return response
 
 
-@app.get("/connect_node", status_code=status.HTTP_200_OK)
+@app.post("/connect_node", status_code=status.HTTP_200_OK)
 def connect_node(node: NodesAddress):
     """
     Connects a new node to the network
@@ -257,8 +257,29 @@ def connect_node(node: NodesAddress):
     for address in node.address:
         blockchain.add_node(address)
 
+    # Broadcast the new node to the network
+    try:
+        for address in node.address:
+            if address != node.address:
+                requests.post(f'http://{address}/connect_node', json={'address': [node.address[0]]})
+        is_broadcasted = True
+    except Exception as e:
+        is_broadcasted = False
+        print(e)
+
     response = {'message': 'All good. The node has been successfully added.',
+                'broadcasted': is_broadcasted,
                 'total_nodes': list(blockchain.nodes)}
+    return response
+
+
+@app.get("/list_nodes", status_code=status.HTTP_200_OK)
+def list_nodes():
+    """
+    Returns the list of nodes in the network
+    :return:
+    """
+    response = {'nodes': list(blockchain.nodes), 'number_of_nodes': len(blockchain.nodes)}
     return response
 
 
