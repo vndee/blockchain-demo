@@ -164,6 +164,8 @@
     document.getElementById("add-transaction-btn").addEventListener("click", function () {
         // Hide the chain-display element
         document.getElementById("chain-display").style.display = "none";
+        // Hide the add-node-form element
+        document.getElementById("add-node-form").style.display = "none";
         // Show the transaction form
         document.getElementById("transaction-form").style.display = "block";
 
@@ -212,6 +214,8 @@
     document.getElementById("mine-block-btn").addEventListener("click", function () {
         // Hide the transaction form
         document.getElementById("transaction-form").style.display = "none";
+        // Hide the add-node-form element
+        document.getElementById("add-node-form").style.display = "none";
         // Show the chain-display element
         document.getElementById("chain-display").style.display = "block";
         // Call the mine_block API
@@ -250,6 +254,8 @@
                 tb_title.style.color = "green";
                 // Hide the transaction form
                 document.getElementById("transaction-form").style.display = "none";
+                // Hide the add-node-form element
+                document.getElementById("add-node-form").style.display = "none";
                 // Show the chain-display element
                 document.getElementById("chain-display").style.display = "block";
 
@@ -353,6 +359,9 @@
     document.getElementById("add-node-btn").addEventListener("click", function () {
         // Hide the chain-display element
         document.getElementById("chain-display").style.display = "none";
+        // Hide the transaction form
+        document.getElementById("transaction-form").style.display = "none";
+
         // Show the add-node-form
         document.getElementById("add-node-form").style.display = "block";
 
@@ -361,33 +370,60 @@
             e.preventDefault();
             // Get the node address from the add-node-form
             let node_address = document.getElementById("node-address").value;
-            // Call the add_node API
-            fetch("{{ host_url }}/connect_node", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "address": [node_address]
-                    })
-                })
+
+            // Call api health check of the node address and exit the listener if the node is not running
+            fetch(`${node_address}/health_check`)
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
                     // Show the result to the UI
                     let tb_title = document.getElementById("add-node-subtitle");
-                    tb_title.innerHTML = data.message;
-                    if (data.message == "All good. The node has been successfully added.") {
-                        tb_title.style.color = "green";
+                    console.log(data.status)
+                    if ("status" in data && data.status != "ok") {
+                        // Call the add_node API
+                        fetch("{{ host_url }}/connect_node", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                "address": [node_address]
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                // Show the result to the UI
+                                let tb_title = document.getElementById("add-node-subtitle");
+                                tb_title.innerHTML = data.message;
+                                if (data.message == "All good. The node has been successfully added.") {
+                                    tb_title.style.color = "green";
+                                } else {
+                                    tb_title.style.color = "red";
+                                }
+
+                                // Set the background of the add-node-form to the green
+                                document.getElementById("add-node-form").style.backgroundColor = "rgb(223, 240, 216)";
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
+
                     } else {
                         tb_title.style.color = "red";
+                        tb_title.innerHTML = "The node address is not valid.<br>Your new node may be down.";
+                        tb_title.style.color = "red";
+                        return
                     }
-
-                    // Set the background of the add-node-form to the green
-                    document.getElementById("add-node-form").style.backgroundColor = "rgb(223, 240, 216)";
                 })
                 .catch(error => {
                     console.error(error);
+                    let tb_title = document.getElementById("add-node-subtitle");
+                    tb_title.style.color = "red";
+                    tb_title.innerHTML = "The node address is not valid.";
+                    document.getElementById("add-node-form").style.backgroundColor = "red";
+                    console.log("Checkpoint 1");
+                    return;
                 });
         });
     });

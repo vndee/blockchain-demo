@@ -161,3 +161,4 @@ def index():
     :return:
     """
     return HTMLResponse(content=open('templates/blockchain.html').read())
+

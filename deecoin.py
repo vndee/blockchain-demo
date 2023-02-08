@@ -307,3 +307,20 @@ def index(request: Request):
     """
     return templates.TemplateResponse("deecoin.html", {"host_url": "http://localhost:8000", "request": request})
 
+
+@app.get("/health_check")
+def health_check():
+    """
+    Health check endpoint
+    :return:
+    """
+    return {"status": "ok"}
+
+
+@app.get("/favicon.ico")
+def favicon():
+    """
+    Returns the favicon
+    :return:
+    """
+    return HTMLResponse(content=open('templates/favicon.png', 'rb').read())
