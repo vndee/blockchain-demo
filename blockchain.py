@@ -15,6 +15,9 @@ class Blockchain(object):
         self.chain = []
         self.new_block(previous_hash='0', nonce=0)
 
+        # Ming first block (genesis block)
+        self.chain[0] = self.proof_of_work(self.chain[0])
+
     def new_block(self, nonce, previous_hash=None):
         """
         Creates a new Block in the Blockchain
@@ -30,7 +33,6 @@ class Blockchain(object):
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
-        block['hash'] = self.hash(block)
         self.chain.append(block)
         return block
 
@@ -48,28 +50,30 @@ class Blockchain(object):
     def last_block(self):
         return self.chain[-1]
 
-    def proof_of_work(self, last_nonce):
+    def proof_of_work(self, block):
         """
-        Simple Proof of Work Algorithm:
-        :param last_nonce: the last nonce
+        Simple Proof of Work Algorithm
+        :param block: the block to be mined
         :return:
         """
         nonce = 0
-        while self.check_valid_nonce(last_nonce, nonce) is False:
+        while self.check_valid_nonce(block, nonce) is False:
             nonce += 1
 
-        return nonce
+        block['nonce'] = nonce
+        block['hash'] = self.hash(block)
+        return block
 
     @staticmethod
-    def check_valid_nonce(last_nonce, nonce):
+    def check_valid_nonce(block, nonce):
         """
-        Validates the Proof: Does hash(last_nonce, nonce) contain 4 leading zeroes?
-        :param last_nonce: the last nonce
-        :param nonce: the current nonce
-        :return:
+        Validates the Proof: Does hash(block_string, nonce) contain 4 leading zeroes?
+        :param block: the block data
+        :param nonce: the nonce
         """
-        guess = f'{last_nonce}{nonce}'.encode()
-        guess_hash = hashlib.sha256(guess).hexdigest()
+        block["nonce"] = nonce
+        block_string = json.dumps(block, sort_keys=True).encode()
+        guess_hash = hashlib.sha256(block_string).hexdigest()
         return guess_hash[:4] == "0000"
 
     def check_valid_chain(self):
@@ -82,11 +86,16 @@ class Blockchain(object):
                 continue
 
             # check if the links (hashes) of 2 consecutive blocks is valid
-            if block['previous_hash'] != self.hash(self.chain[index - 1]):
+            # previous block without hash attribute
+            prev = self.chain[index - 1]
+            prev = {k: prev[k] for k in prev if k != 'hash'}
+
+            if block['previous_hash'] != self.hash(prev):
                 return False
 
             # check if the nonce is valid
-            if not self.check_valid_nonce(self.chain[index - 1]['nonce'], block['nonce']):
+            block = {k: block[k] for k in block if k != 'hash' and k != 'none'}
+            if not self.check_valid_nonce(block, block['nonce']):
                 return False
 
         return True
@@ -110,12 +119,9 @@ def mine_block():
     Mines a new block
     :return:
     """
-    previous_block = blockchain.last_block
-    previous_nonce = previous_block['nonce']
-
-    nonce = blockchain.proof_of_work(previous_nonce)
-    previous_hash = blockchain.hash(previous_block)
-    block = blockchain.new_block(nonce, previous_hash)
+    previous_hash = blockchain.last_block["hash"]
+    block = blockchain.new_block(0, previous_hash)
+    block = blockchain.proof_of_work(block)
 
     response = {
         'message': 'Congratulations, you just mined a block!',
